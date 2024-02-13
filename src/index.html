@@ -16,6 +16,13 @@
 	</head>
 	<body>
 
+		
+		<div class="players">
+			<img src="assets/images/cross.svg" alt="" class="player">
+			<img src="assets/images/circle.svg" alt="" class="player">
+		</div>
+			
+
 		<div id="game" class="game">
 			<div class="cell"></div>
 			<div class="cell"></div>
@@ -28,19 +35,26 @@
 			<div class="cell"></div>
 		</div>
 
-		<div id="points-counter" class="points-counter">
+		<div id="points-counter" class="row">
 			<div class="points">
 				<span>X (YOU)</span>
 				<span id="you">0</span>
 			</div>
 			<div class="points">
-				<span>TIES</span>
-				<span id="ties">0</span>
+				<span>Attempts</span>
+				<span id="attempts">0</span>
 			</div>
 			<div class="points">
 				<span>O (CPU)</span>
 				<span id="cpu">0</span>
 
+			</div>
+		</div>
+
+		<div id="pop-up" class="pop-up">
+			<span id="winner">YOU WIN!</span>
+			<div class="return">
+				<button id="return-button" class="return-button"><img src="assets/images/return.svg" alt="" class="img-return"></button>
 			</div>
 		</div>
 		<script type="module" src="./js/index.js"></script>

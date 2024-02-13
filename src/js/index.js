@@ -1,125 +1,120 @@
-const cells = document.querySelectorAll('.cell');
-const tiesElement = document.getElementById('ties');
-const youElement = document.getElementById('you');
-const pcElement = document.getElementById('pc');
-let currentPlayer = 'X';
-const gameState = ['', '', '', '', '', '', '', '', ''];
-let counter = 0;
-let youPoints = 0;
-let pcPoints = 0;
+const gameElement = document.getElementById('game');
+const youScoreElement = document.getElementById('you');
+const cpuScoreElement = document.getElementById('cpu');
+const attemptsElement = document.getElementById('attempts');
+const returnButtonElement = document.getElementById('return-button');
+const popUpElement = document.getElementById('pop-up');
+const winnerElement = document.getElementById('winner')
 
+let board = ['', '', '', '', '', '', '', '', ''];
+let currentPlayer = 'cross';
+let youScore = 0;
+let cpuScore = 0;
+let attempts = 0;
 
-// Función para manejar el clic en una celda
-const handleCellClick = index => {
-	if (gameState[index] === '' && !checkWinner()) {
-		makeMove(index);
-		setTimeout(handleCPUMove, 500);
-	}
-};
-
-// Función para que el jugador o la CPU realice un movimiento
-const makeMove = index => {
-	gameState[index] = currentPlayer;
-	renderBoard();
-	checkWinner();
-	togglePlayer();
-};
-
-// Función para cambiar el jugador actual
-const togglePlayer = () => {
-	currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
-};
-
-// Función para que la CPU realice su movimiento
-const handleCPUMove = () => {
-	const emptyCells = gameState.reduce((acc, val, index) => {
-		if (val === '') acc.push(index);
-		return acc;
-	}, []);
-
-	if (emptyCells.length > 0) {
-		const randomIndex = Math.floor(Math.random() * emptyCells.length);
-		makeMove(emptyCells[randomIndex]);
-	}
-};
-
-// Función para pintar el tablero
-const renderBoard = () => {
-	cells.forEach((cell, index) => {
-		const imgSrc =
-			gameState[index] === 'X'
-				? 'assets/images/cross.svg'
-				: gameState[index] === 'O'
-					? 'assets/images/circle.svg'
-					: '';
-		cell.innerHTML = imgSrc
-			? `<img src="${imgSrc}" alt="${gameState[index]}">`
-			: '';
-	});
-};
-
-const addTies = () => {
-	counter++;
-	tiesElement.textContent = counter;
-};
-
-// Función para verificar si hay un ganador
 const checkWinner = () => {
-	const winPatterns = [
+	const winConditions = [
 		[0, 1, 2],
 		[3, 4, 5],
-		[6, 7, 8], // Filas
+		[6, 7, 8],
 		[0, 3, 6],
 		[1, 4, 7],
-		[2, 5, 8], // Columnas
+		[2, 5, 8],
 		[0, 4, 8],
-		[2, 4, 6] // Diagonales
+		[2, 4, 6]
 	];
 
-	for (const pattern of winPatterns) {
-		const [a, b, c] = pattern;
-		if (
-			gameState[a] &&
-			gameState[a] === gameState[b] &&
-			gameState[a] === gameState[c]
-		) {
-			if (gameState[a] === 'X') {
-				alert('You win!');
-                youPoints++
-				youElement.textContent = youPoints;
-			} else if (gameState[a] === 'O') {
-				alert('PC wins!');
-                pcPoints++
-                pcElement.textContent = pcPoints;
-
-			}
-			resetGame();
-			addTies(); // Reiniciar el juego después de mostrar el mensaje de ganador
+	for (const condition of winConditions) {
+		const [a, b, c] = condition;
+		if (board[a] && board[a] === board[b] && board[a] === board[c]) {
 			return true;
 		}
 	}
-
-	if (!gameState.includes('')) {
-		alert("It's a tie!");
-		resetGame();
-		addTies(); // Reiniciar el juego después de mostrar el mensaje de empate
-		return true;
-	}
-
 	return false;
 };
 
-// Función para limpiar el tablero y restablecer el juego
-const resetGame = () => {
-	currentPlayer = 'X'; // Reiniciar el jugador actual
-	gameState.fill(''); // Limpiar el estado del juego
-	renderBoard(); // Renderizar el tablero limpio
+const makeMove = index => {
+	if (board[index] === '') {
+		board[index] = currentPlayer;
+		const cell = gameElement.children[index];
+		cell.innerHTML = `<img src="../assets/images/${currentPlayer}.svg" alt="${currentPlayer}">`;
+		if (checkWinner()) {
+			if (currentPlayer === 'cross') {
+				youScore++;
+				youScoreElement.innerText = youScore;
+			} else {
+				cpuScore++;
+				cpuScoreElement.innerText = cpuScore;
+			}
+			console.log(currentPlayer + ' wins!');
+			popUpElement.classList.add('pop-up-show');
+			winnerElement.textContent= `${currentPlayer} wins!`
+			endGame();
+		} else if (board.every(cell => cell !== '')) {
+			attemptsElement.innerText = attempts;
+			console.log("It's a tie!");
+			popUpElement.classList.add('pop-up-show');
+			winnerElement.textContent= `It's a tie!`
+			endGame();
+		} else {
+			currentPlayer = currentPlayer === 'cross' ? 'circle' : 'cross';
+			if (currentPlayer === 'circle') {
+				setTimeout(() => {
+					makeCPUMove();
+				}, 500); // Ajustar el tiempo según sea necesario
+			}
+		}
+	}
 };
 
-// Añadir evento clic a cada celda
-cells.forEach((cell, index) => {
-	cell.addEventListener('click', () => handleCellClick(index));
-});
+const makeCPUMove = () => {
+	const availableMoves = [];
+	for (let i = 0; i < board.length; i++) {
+		if (board[i] === '') {
+			availableMoves.push(i);
+		}
+	}
+	const randomIndex = Math.floor(Math.random() * availableMoves.length);
+	const selectedMove = availableMoves[randomIndex];
+	makeMove(selectedMove);
+};
 
-// Renderizar el tablero inicial
-renderBoard();
+const endGame = () => {
+	attempts++; // Incrementar el número de intentos al finalizar el juego
+};
+
+const restart = () => {
+	board = ['', '', '', '', '', '', '', '', ''];
+	currentPlayer = 'cross';
+	for (const cell of gameElement.getElementsByClassName('cell')) {
+		cell.innerHTML = '';
+	}
+};
+
+const handleCellClick = index => {
+	return () => {
+		makeMove(index);
+	};
+};
+
+const assignClickEventsToCells = () => {
+	for (let i = 0; i < gameElement.children.length; i++) {
+		gameElement.children[i].addEventListener('click', handleCellClick(i));
+	}
+};
+
+const handleReturnButtonClick = () => {
+	restart();
+	updateAttemptsDisplay(); // Actualizar el número de intentos
+	popUpElement.classList.remove('pop-up-show')
+
+};
+
+// Función para actualizar el marcador de intentos
+const updateAttemptsDisplay = () => {
+	attemptsElement.textContent = attempts;
+};
+// Llamar a las funciones para asignar los eventos
+assignClickEventsToCells();
+
+returnButtonElement.addEventListener('click', handleReturnButtonClick);
