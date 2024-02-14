@@ -42,6 +42,7 @@ body{
 	align-items: center;
 	justify-content: center;
 	padding: 15px;
+	cursor: pointer;
 }
 
 .row{
@@ -119,6 +120,7 @@ body{
 	justify-content: center;
 	align-items: center;
 	box-shadow:  0 2px 0 var(--button-shadow); 
+	cursor: pointer;
 }
 .img-return{
 	width: 16px;
