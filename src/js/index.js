@@ -1,11 +1,14 @@
+// images.js
+import crossImage from '../assets/images/cross.svg';
+import circleImage from '../assets/images/circle.svg';
+
 const gameElement = document.getElementById('game');
 const youScoreElement = document.getElementById('you');
 const cpuScoreElement = document.getElementById('cpu');
 const attemptsElement = document.getElementById('attempts');
 const returnButtonElement = document.getElementById('return-button');
 const popUpElement = document.getElementById('pop-up');
-const winnerElement = document.getElementById('winner')
-
+const winnerElement = document.getElementById('winner');
 let board = ['', '', '', '', '', '', '', '', ''];
 let currentPlayer = 'cross';
 let youScore = 0;
@@ -37,7 +40,11 @@ const makeMove = index => {
 	if (board[index] === '') {
 		board[index] = currentPlayer;
 		const cell = gameElement.children[index];
-		cell.innerHTML = `<img src="../assets/images/${currentPlayer}.svg" alt="${currentPlayer}">`;
+		cell.innerHTML =
+			currentPlayer === 'cross'
+				? `<img src="${crossImage}" alt="cross">`
+				: `<img src="${circleImage}" alt="circle">`;
+
 		if (checkWinner()) {
 			if (currentPlayer === 'cross') {
 				youScore++;
@@ -46,22 +53,20 @@ const makeMove = index => {
 				cpuScore++;
 				cpuScoreElement.innerText = cpuScore;
 			}
-			console.log(currentPlayer + ' wins!');
 			popUpElement.classList.add('pop-up-show');
-			winnerElement.textContent= `${currentPlayer} wins!`
+			winnerElement.textContent = `${currentPlayer} wins!`;
 			endGame();
 		} else if (board.every(cell => cell !== '')) {
 			attemptsElement.innerText = attempts;
-			console.log("It's a tie!");
 			popUpElement.classList.add('pop-up-show');
-			winnerElement.textContent= `It's a tie!`
+			winnerElement.textContent = `It's a tie!`;
 			endGame();
 		} else {
 			currentPlayer = currentPlayer === 'cross' ? 'circle' : 'cross';
 			if (currentPlayer === 'circle') {
 				setTimeout(() => {
 					makeCPUMove();
-				}, 500); // Ajustar el tiempo según sea necesario
+				}, 500);
 			}
 		}
 	}
@@ -80,41 +85,35 @@ const makeCPUMove = () => {
 };
 
 const endGame = () => {
-	attempts++; // Incrementar el número de intentos al finalizar el juego
+	attempts++;
 };
 
 const restart = () => {
-	board = ['', '', '', '', '', '', '', '', ''];
-	currentPlayer = 'cross';
-	for (const cell of gameElement.getElementsByClassName('cell')) {
-		cell.innerHTML = '';
-	}
+    board = ['', '', '', '', '', '', '', '', ''];
+    currentPlayer = 'cross';
+    const cells = gameElement.querySelectorAll('.cell');
+    cells.forEach(cell => {
+        cell.innerHTML = '';
+    });
 };
 
-const handleCellClick = index => {
-	return () => {
-		makeMove(index);
-	};
-};
-
-const assignClickEventsToCells = () => {
-	for (let i = 0; i < gameElement.children.length; i++) {
-		gameElement.children[i].addEventListener('click', handleCellClick(i));
+const handleGameClick = event => {
+	const clickedCell = event.target;
+	if (clickedCell.classList.contains('cell')) {
+		const cellIndex = clickedCell.dataset.index;
+		makeMove(cellIndex);
 	}
 };
 
 const handleReturnButtonClick = () => {
 	restart();
-	updateAttemptsDisplay(); // Actualizar el número de intentos
-	popUpElement.classList.remove('pop-up-show')
-
+	updateAttemptsDisplay();
+	popUpElement.classList.remove('pop-up-show');
 };
 
-// Función para actualizar el marcador de intentos
 const updateAttemptsDisplay = () => {
 	attemptsElement.textContent = attempts;
 };
-// Llamar a las funciones para asignar los eventos
-assignClickEventsToCells();
 
+gameElement.addEventListener('click', handleGameClick);
 returnButtonElement.addEventListener('click', handleReturnButtonClick);
